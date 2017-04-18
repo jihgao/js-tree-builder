@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+    <script type="text/javascript" src="js-tree-builder.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+        var list = [
+            {
+              parent_id:-1,
+              name: "root1",
+              id:1
+            },
+            {
+              parent_id: 1,
+              id:2,
+              name: "node1"
+            },
+            {
+              parent_id: 1,
+              id:3,
+              name: "node2"
+            },
+            {
+              parent_id:-1,
+              name: "root2",
+              id:4
+            },
+            {
+              parent_id:4,
+              name: "node3",
+              id:5
+            }
+        ];
+
+
+        var docfrag = document.createDocumentFragment();
+
+        function renderTree(nodeItems, domContainer){
+          var ul = document.createElement("ul");
+          nodeItems.forEach(function(item){
+            var node = document.createElement("li");
+            node.textContent = item.name;
+            ul.appendChild(node);
+            if( item.children ){
+              renderTree(item.children, node);
+            }
+          });
+          domContainer.appendChild(ul);
+        }
+      renderTree(new TreeBuild(list).nodes, docfrag);
+      document.body.appendChild(docfrag);
+    </script>
+  </body>
+</html>
