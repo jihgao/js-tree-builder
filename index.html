@@ -35,8 +35,10 @@
             }
         ];
 
-
+        var tree = new TreeBuild(list);
         var docfrag = document.createDocumentFragment();
+        renderTree(tree.nodes, docfrag);
+        document.body.appendChild(docfrag);
 
         function renderTree(nodeItems, domContainer){
           var ul = document.createElement("ul");
@@ -50,8 +52,6 @@
           });
           domContainer.appendChild(ul);
         }
-      renderTree(new TreeBuild(list).nodes, docfrag);
-      document.body.appendChild(docfrag);
     </script>
   </body>
 </html>

@@ -1,15 +1,50 @@
 function TreeBuild(list, options){
-	this.origin_list = JSON.parse(JSON.stringify(list));
+	var processed_count = 0, node_count = list.length;
 	this.options = options || {};
-	this.options.primary_key = (this.options && this.options.primary_key) || 'id';
-	this.options.parent_key = (this.options && this.options.parent_key) || 'parent_id';
-	this.processed_count = 0;
-	this.node_count = list.length;
+	this.options.node_key = this.options.node_key || 'id';
+	this.options.parent_key = this.options.parent_key || 'parent_id';
+
+	this.getRootNodes = function(){
+		return list.filter(function(nodeItem){
+			if ( !nodeItem[this.options.parent_key] || nodeItem[this.options.parent_key] === -1 ){
+				processed_count++;
+				return true;
+			}else{
+				return false;
+			}
+		}.bind(this));
+	};
+
+	this.getChildren = function(parentNode){
+		if( processed_count === node_count ){
+			return false;
+		}
+		return list.filter(function(nodeItem){
+			if( nodeItem[this.options.parent_key] === parentNode[this.options.node_key] ){
+				processed_count++;
+				nodeItem.parentNode = parentNode;
+				this.appendChildren(nodeItem, this.getChildren(nodeItem));
+				return true;
+			}else{
+				return false;
+			}
+		}.bind(this));
+	};
+
 	this.compute();
 }
 
 TreeBuild.prototype.getAllNodes = function(){
 	return this.nodes ? this.nodes : this.compute();
+};
+
+
+TreeBuild.prototype.getParentNode = function(nodeItem){
+	return nodeItem.parentNode || null;
+};
+
+TreeBuild.prototype.getSiblings = function(nodeItem){
+	return (nodeItem.parentNode && Array.isArray(nodeItem.parentNode.children)) || [];
 };
 
 TreeBuild.prototype.compute = function(){
@@ -20,33 +55,6 @@ TreeBuild.prototype.compute = function(){
 	}.bind(this));
 
 	return this.nodes;
-};
-
-TreeBuild.prototype.getRootNodes = function(){
-	return this.origin_list.filter(function(nodeItem){
-		if ( !nodeItem[this.options.parent_key] || nodeItem[this.options.parent_key] === -1 ){
-			this.processed_count++;
-			return true;
-		}else{
-			return false;
-		}
-	}.bind(this));
-};
-
-TreeBuild.prototype.getChildren = function(parentNode){
-	if( this.processed_count === this.node_count ){
-		return false;
-	}
-	return this.origin_list.filter(function(nodeItem){
-		if( nodeItem[this.options.parent_key] === parentNode[this.options.primary_key] ){
-			this.processed_count++;
-			nodeItem.parentNode = parentNode;
-			this.appendChildren(nodeItem, this.getChildren(nodeItem));
-			return true;
-		}else{
-			return false;
-		}
-	}.bind(this));
 };
 
 TreeBuild.prototype.appendChildren = function(nodeItem, foundChildren){
